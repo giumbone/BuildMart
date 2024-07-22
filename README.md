@@ -1,1 +1,1 @@
-# BuildMart
+BuildMart is a Django-based project designed to streamline construction management tasks. It leverages Django's robust framework to handle project setup, administration, and application management effectively. Through the manage.py file, users gain access to crucial functionalities for developing and maintaining their marketplace, facilitating a seamless project management experience.
