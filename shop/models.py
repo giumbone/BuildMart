@@ -1,5 +1,6 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name=_("Product Name"))
@@ -15,3 +16,24 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        # Example of custom validation logic
+        if self.price <= 0:
+            raise ValidationError(_("Price must be greater than 0."))
+        if self.stock < 0:
+            raise ValidationError(_("Stock quantity cannot be negative."))
+
+    def save(self, *args, **kwargs):
+        try:
+            # This ensures all Django model field validations are checked before saving
+            self.full_clean()
+            # Wrap save operation in a transaction to ensure database integrity
+            with transaction.atomic():
+                super(Product, self).save(*args, **kwargs)
+        except ValidationError as e:
+            # Handle specific validation errors here or pass up to be handled at a higher level
+            raise e
+        except Exception as e:
+            # Log this exception or handle it as per your error handling policy
+            raise ValueError("An error occurred saving the product. Please try again.")
